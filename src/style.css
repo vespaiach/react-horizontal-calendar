@@ -1,3 +1,14 @@
+:root {
+    --box-width: 290px;
+}
+.hdp-picker,
+.hdp-date,
+.hdp-month {
+    font-family: 'Roboto', sans-serif;
+    font-size: 0.8rem;
+    line-height: 1.42857143;
+    color: #333;
+}
 .hdp-picker {
     width: 100%;
     height: 100%;
@@ -6,10 +17,42 @@
     overflow: hidden;
     display: grid;
     grid-auto-flow: column;
+    grid-auto-columns: var(--box-width);
+    gap: 4px;
 }
 .hdp-month {
     display: grid;
+    width: var(--box-width);
 }
-.hdp-month-name {
+.hdp-monthname,
+.hdp-date,
+.hdp-weekday {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.hdp-monthname {
     grid-column: 1/8;
+}
+.hdp-weekday {
+    align-items: flex-end;
+}
+.hdp-date {
+    user-select: none;
+    border: none;
+    padding: 0;
+}
+.hdp-date.disabled {
+    color: #3b3b3b40;
+}
+.hdp-date:not(.disabled) {
+    cursor: pointer;
+}
+.hdp-date:not(.disabled):hover {
+    background: #d6d6d6;
+}
+.hdp-weekday,
+.hdp-monthname {
+    font-weight: 700;
+    color: #4f4e4e;
 }

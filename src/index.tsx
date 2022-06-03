@@ -1,9 +1,9 @@
 import './style.css';
 
-import React, { useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import cx from 'classnames';
 
-const PADDING = 5; // 5 months to the left and right of startDate
+const PADDING = 10; // 10 months
 const DayNames = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
 const MonthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
@@ -25,10 +25,28 @@ export default function DatePicker({
     onChange?: (values: Date | [Date, Date] | null) => void;
 }) {
     const pickerRef = useRef<HTMLDivElement>(null);
+    const [padding, setPadding] = useState(PADDING);
 
     const [monthData, setMonthData] = useState(() =>
-        getMonthRange(startDate.getMonth(), startDate.getFullYear(), PADDING),
+        getMonthRange(startDate.getMonth(), startDate.getFullYear(), padding),
     );
+    const updatePadding = useCallback(() => {
+        if (!pickerRef?.current) return;
+
+        const rect = pickerRef.current.getBoundingClientRect();
+        setPadding(Math.ceil(rect.width / monthWidth));
+    }, [setPadding, pickerRef]);
+
+    useEffect(() => {
+        if (pickerRef.current) {
+            updatePadding();
+        }
+
+        window.addEventListener('resize', updatePadding);
+        return () => {
+            window.removeEventListener('resize', updatePadding);
+        };
+    }, [setPadding]);
 
     return (
         <div className={cx('hdp-picker', className)} ref={pickerRef}>
@@ -42,20 +60,26 @@ export default function DatePicker({
 function MonthBox({ width, data }: { width: number; data: MonthData }) {
     const dateEls = [];
     const dt = new Date(data.startDate);
+    let step = 0;
     for (let i = 0; i < 42; i++) {
-        dt.setDate(dt.getDate() + i);
+        dt.setDate(dt.getDate() + step);
+        const disabled = dt.getMonth() !== data.month;
+        const tabIndex = disabled ? { tabIndex: -1 } : {};
         dateEls.push(
-            <button className="hdp-date" key={dt.getTime()}>
+            <button {...tabIndex} className={cx('hdp-date', { disabled })} key={dt.getTime()}>
                 {dt.getDate()}
             </button>,
         );
+        step = 1;
     }
 
     return (
-        <div style={{ width }} className="hdp-month">
-            <div className='hdp-month-name'>{`${MonthNames[data.month]} ${data.year}`}</div>
-            {DayNames.map((d) => (
-                <div key={d}>{d}</div>
+        <div className="hdp-month">
+            <div className="hdp-monthname">{`${MonthNames[data.month]} ${data.year}`}</div>
+            {DayNames.map((d, i) => (
+                <div className="hdp-weekday" key={i}>
+                    {d}
+                </div>
             ))}
             {dateEls}
         </div>
@@ -67,11 +91,11 @@ function MonthBox({ width, data }: { width: number; data: MonthData }) {
  */
 function getMonthRange(currMonth: number, currYear: number, padding: number): MonthData[] {
     const currDate = new Date(currYear, currMonth, 1);
-    const fromDate = new Date(currDate.setMonth(currDate.getMonth() - padding));
 
     const results: MonthData[] = [];
+    let step = 0;
     for (let i = 0; i < padding; i++) {
-        const firstDateOfMonth = new Date(fromDate.setMonth(fromDate.getMonth() + i));
+        const firstDateOfMonth = new Date(currDate.setMonth(currDate.getMonth() + step));
 
         // For displaying purpose, the fist day of month on calendar is not actually the first day of month.
         // It can be the day of previous month.
@@ -81,9 +105,11 @@ function getMonthRange(currMonth: number, currYear: number, padding: number): Mo
 
         results.push({
             startDate: firstDateOfMonth,
-            month: fromDate.getMonth(),
-            year: fromDate.getFullYear(),
+            month: currDate.getMonth(),
+            year: currDate.getFullYear(),
         });
+
+        step = 1;
     }
 
     return results;
