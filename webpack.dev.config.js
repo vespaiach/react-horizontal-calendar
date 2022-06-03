@@ -1,9 +1,10 @@
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 
 module.exports = {
-    mode: 'production',
-    entry: './src/index.tsx',
+    mode: 'development',
+    entry: './demo/App.tsx',
     module: {
         rules: [
             {
@@ -18,33 +19,29 @@ module.exports = {
             },
             {
                 test: /\.css$/i,
-                use: ['style-loader', 'css-loader'],
+                use: [MiniCssExtractPlugin.loader, 'css-loader'],
             },
         ],
     },
     plugins: [
+        new MiniCssExtractPlugin(),
         new HtmlWebpackPlugin({
-            template: './src/index.html',
+            template: './demo/index.html',
         }),
     ],
     resolve: {
         extensions: ['.tsx', '.ts', '.js'],
     },
     output: {
-        filename: 'horizontal.datepicker.bundle.js',
+        filename: '[name].bundle.js',
         path: path.resolve(__dirname, 'dist'),
-        library: {
-            name: 'horizontal-datepicker',
-            type: 'umd',
-            umdNamedDefine: true,
-        },
     },
-    externals: {
-        react: {
-            commonjs: 'react',
-            commonjs2: 'react',
-            amd: 'react',
-            root: 'react',
-        },
+    devServer: {
+        static: [
+            {
+                directory: path.join(__dirname, 'dist'),
+            },
+        ],
+        port: 9000,
     },
 };

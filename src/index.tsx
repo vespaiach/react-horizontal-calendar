@@ -20,9 +20,9 @@ export default function DatePicker({
     onChange,
 }: {
     className?: string;
-    startDate: Date;
-    monthWidth: number;
-    onChange: (values: Date | [Date, Date] | null) => void;
+    startDate?: Date;
+    monthWidth?: number;
+    onChange?: (values: Date | [Date, Date] | null) => void;
 }) {
     const pickerRef = useRef<HTMLDivElement>(null);
 
@@ -31,7 +31,7 @@ export default function DatePicker({
     );
 
     return (
-        <div className={cx('picker', className)} ref={pickerRef}>
+        <div className={cx('hdp-picker', className)} ref={pickerRef}>
             {monthData.map((m) => (
                 <MonthBox key={`${m.month}${m.year}`} width={monthWidth} data={m} />
             ))}
@@ -42,18 +42,18 @@ export default function DatePicker({
 function MonthBox({ width, data }: { width: number; data: MonthData }) {
     const dateEls = [];
     const dt = new Date(data.startDate);
-    for (let i = 0; i < 36; i++) {
+    for (let i = 0; i < 42; i++) {
         dt.setDate(dt.getDate() + i);
         dateEls.push(
-            <button className="date" key={dt.getTime()}>
+            <button className="hdp-date" key={dt.getTime()}>
                 {dt.getDate()}
             </button>,
         );
     }
 
     return (
-        <div style={{ width }} className="month">
-            <div style={{ gridColumn: '1 / 8' }}>{`${MonthNames[data.month]} ${data.year}`}</div>
+        <div style={{ width }} className="hdp-month">
+            <div className='hdp-month-name'>{`${MonthNames[data.month]} ${data.year}`}</div>
             {DayNames.map((d) => (
                 <div key={d}>{d}</div>
             ))}
