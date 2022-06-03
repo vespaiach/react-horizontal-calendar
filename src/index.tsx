@@ -2,13 +2,14 @@ import './style.css';
 
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import cx from 'classnames';
+import { useGesture } from '@use-gesture/react';
 
-const PADDING = 10; // 10 months
 const DayNames = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
 const MonthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
 interface MonthData {
     startDate: Date;
+    x: number;
     month: number;
     year: number;
 }
@@ -16,26 +17,33 @@ interface MonthData {
 export default function DatePicker({
     className,
     startDate = new Date(),
-    monthWidth = 290,
+    boxWidth = 290,
     onChange,
 }: {
     className?: string;
     startDate?: Date;
-    monthWidth?: number;
+    boxWidth?: number;
     onChange?: (values: Date | [Date, Date] | null) => void;
 }) {
     const pickerRef = useRef<HTMLDivElement>(null);
-    const [padding, setPadding] = useState(PADDING);
+    const [containerWidth, setContainerWidth] = useState(2000);
+    const [x, setX] = useState(0);
 
     const [monthData, setMonthData] = useState(() =>
-        getMonthRange(startDate.getMonth(), startDate.getFullYear(), padding),
+        getMonthRange({
+            startMonth: startDate.getMonth(),
+            startYear: startDate.getFullYear(),
+            boxWidth,
+            containerWidth,
+            containerOffset: x,
+        }),
     );
     const updatePadding = useCallback(() => {
         if (!pickerRef?.current) return;
 
         const rect = pickerRef.current.getBoundingClientRect();
-        setPadding(Math.ceil(rect.width / monthWidth));
-    }, [setPadding, pickerRef]);
+        setContainerWidth(rect.width);
+    }, [setContainerWidth, pickerRef]);
 
     useEffect(() => {
         if (pickerRef.current) {
@@ -46,18 +54,39 @@ export default function DatePicker({
         return () => {
             window.removeEventListener('resize', updatePadding);
         };
-    }, [setPadding]);
+    }, [updatePadding, pickerRef.current]);
+
+    const bind = useGesture({
+        onDrag: ({ delta: [dx] }) => {
+            setX(x + dx);
+            setMonthData(
+                getMonthRange({
+                    startMonth: startDate.getMonth(),
+                    startYear: startDate.getFullYear(),
+                    boxWidth,
+                    containerWidth,
+                    containerOffset: x + dx,
+                }),
+            );
+        },
+    });
 
     return (
-        <div className={cx('hdp-picker', className)} ref={pickerRef}>
-            {monthData.map((m) => (
-                <MonthBox key={`${m.month}${m.year}`} width={monthWidth} data={m} />
-            ))}
+        <div className={cx('hdp-container', className)}>
+            <div
+                {...bind()}
+                className="hdp-picker"
+                ref={pickerRef}
+                style={{ transform: `translate3d(${x}px,0px,0px)` }}>
+                {monthData.map((m) => (
+                    <MonthBox key={`${m.month}${m.year}`} data={m} />
+                ))}
+            </div>
         </div>
     );
 }
 
-function MonthBox({ width, data }: { width: number; data: MonthData }) {
+function MonthBox({ data }: { data: MonthData }) {
     const dateEls = [];
     const dt = new Date(data.startDate);
     let step = 0;
@@ -74,7 +103,7 @@ function MonthBox({ width, data }: { width: number; data: MonthData }) {
     }
 
     return (
-        <div className="hdp-month">
+        <div className="hdp-month" style={{ transform: `translate3d(${data.x}px,0px,0px)` }}>
             <div className="hdp-monthname">{`${MonthNames[data.month]} ${data.year}`}</div>
             {DayNames.map((d, i) => (
                 <div className="hdp-weekday" key={i}>
@@ -87,30 +116,54 @@ function MonthBox({ width, data }: { width: number; data: MonthData }) {
 }
 
 /**
- * Generate a list of continuous month data: [currMonth, currMonth + padding]
+ * Generate a list of continuous month data:
+ * [two padding months, startMonth + deltaMonth, months after (based on container's width), two padding months]
  */
-function getMonthRange(currMonth: number, currYear: number, padding: number): MonthData[] {
-    const currDate = new Date(currYear, currMonth, 1);
+function getMonthRange({
+    startMonth,
+    startYear,
+    boxWidth,
+    containerWidth,
+    containerOffset,
+}: {
+    startMonth: number;
+    startYear: number;
+    boxWidth: number;
+    containerWidth: number;
+    containerOffset: number;
+}): MonthData[] {
+    const currDate = new Date(startYear, startMonth, 1);
+
+    const deltaMonth = Math.trunc(Math.abs(containerOffset) / boxWidth);
+    currDate.setMonth(currDate.getMonth() - 2 + deltaMonth * (containerOffset > 0 ? -1 : 1));
+
+    const totalMonths = 2 + 1 + Math.trunc(containerWidth / boxWidth) + 2; // left_padding + start_month + visible_months + right_padding
 
     const results: MonthData[] = [];
-    let step = 0;
-    for (let i = 0; i < padding; i++) {
-        const firstDateOfMonth = new Date(currDate.setMonth(currDate.getMonth() + step));
-
-        // For displaying purpose, the fist day of month on calendar is not actually the first day of month.
-        // It can be the day of previous month.
-        if (firstDateOfMonth.getDay() > 0) {
-            firstDateOfMonth.setDate(firstDateOfMonth.getDate() - firstDateOfMonth.getDay());
-        }
+    for (let i = 1; i <= totalMonths; i++) {
+        const firstDateOfMonth = new Date(currDate.setMonth(currDate.getMonth() + 1));
 
         results.push({
-            startDate: firstDateOfMonth,
+            startDate: firstDateInMonth(firstDateOfMonth),
             month: currDate.getMonth(),
             year: currDate.getFullYear(),
+            x:
+                ((currDate.getFullYear() - startYear) * 12 + (currDate.getMonth() - startMonth)) *
+                (boxWidth + 4),
         });
-
-        step = 1;
     }
 
     return results;
+}
+
+/**
+ * For displaying purpose, the fist day of month on calendar is not actually the first day of month.
+ * It can be the day of previous month.
+ */
+function firstDateInMonth(firstDateOfMonth: Date): Date {
+    if (firstDateOfMonth.getDay() > 0) {
+        firstDateOfMonth.setDate(firstDateOfMonth.getDate() - firstDateOfMonth.getDay());
+    }
+
+    return firstDateOfMonth;
 }

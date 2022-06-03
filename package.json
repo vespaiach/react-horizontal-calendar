@@ -40,6 +40,7 @@
         "react": "^17.0.0"
     },
     "dependencies": {
+        "@use-gesture/react": "^10.2.15",
         "classnames": "^2.3.1"
     }
 }
