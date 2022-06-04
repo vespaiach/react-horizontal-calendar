@@ -1,10 +1,13 @@
 .hdp-outer-container .hdp-inner-container,
 .hdp-date-cell,
-.hdp-month-box {
+.hdp-month-box,
+.hdp-month-name-cell,
+.hdp-week-day-cell {
     font-family: 'Roboto', sans-serif;
     font-size: 0.8rem;
     line-height: 1.42857143;
     color: #333;
+    user-select: none;
 }
 
 .hdp-outer-container {
@@ -43,7 +46,6 @@
     height: var(--hdp-week-day-cell-height);
 }
 .hdp-date-cell {
-    user-select: none;
     border: none;
     padding: 0;
     height: var(--hdp-date-cell-height);

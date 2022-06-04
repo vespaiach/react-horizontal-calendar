@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import cx from 'classnames';
-import { useGesture } from '@use-gesture/react';
+import { useGesture, usePinch, UserHandlers } from '@use-gesture/react';
 
 const DayNames = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
 const MonthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -32,7 +32,6 @@ export default function DatePicker({
     const pickerRef = useRef<HTMLDivElement>(null);
     const [containerWidth, setContainerWidth] = useState(2000);
     const [x, setX] = useState(0);
-
     const [monthData, setMonthData] = useState(() =>
         getMonthRange({
             startMonth: startDate.getMonth(),
@@ -42,7 +41,9 @@ export default function DatePicker({
             containerOffset: x,
         }),
     );
-    const updatePadding = useCallback(() => {
+    const [selected, setSelected] = useState<[Date | null, Date | null]>([null, null]);
+
+    const updateContainerWidth = useCallback(() => {
         if (!pickerRef?.current) return;
 
         const rect = pickerRef.current.getBoundingClientRect();
@@ -51,28 +52,31 @@ export default function DatePicker({
 
     useEffect(() => {
         if (pickerRef.current) {
-            updatePadding();
+            updateContainerWidth();
         }
 
-        window.addEventListener('resize', updatePadding);
+        window.addEventListener('resize', updateContainerWidth);
         return () => {
-            window.removeEventListener('resize', updatePadding);
+            window.removeEventListener('resize', updateContainerWidth);
         };
-    }, [updatePadding, pickerRef.current]);
+    }, [updateContainerWidth, pickerRef.current]);
+
+    const update = (delta: number) => {
+        setX(x + delta);
+        setMonthData(
+            getMonthRange({
+                startMonth: startDate.getMonth(),
+                startYear: startDate.getFullYear(),
+                monthBoxWidth,
+                containerWidth,
+                containerOffset: x + delta,
+            }),
+        );
+    };
 
     const bind = useGesture({
-        onDrag: ({ delta: [dx] }) => {
-            setX(x + dx);
-            setMonthData(
-                getMonthRange({
-                    startMonth: startDate.getMonth(),
-                    startYear: startDate.getFullYear(),
-                    monthBoxWidth,
-                    containerWidth,
-                    containerOffset: x + dx,
-                }),
-            );
-        },
+        onDrag: ({ delta: [x] }) => update(x),
+        onWheel: ({ delta: [, y] }) => update(y),
     });
 
     return (
@@ -148,7 +152,7 @@ function getMonthRange({
     const currDate = new Date(startYear, startMonth, 1);
 
     const deltaMonth = Math.trunc(Math.abs(containerOffset) / monthBoxWidth);
-    currDate.setMonth(currDate.getMonth() - 2 + deltaMonth * (containerOffset > 0 ? -1 : 1));
+    currDate.setMonth(currDate.getMonth() - 3 + deltaMonth * (containerOffset > 0 ? -1 : 1));
 
     const totalMonths = 2 + 1 + Math.trunc(containerWidth / monthBoxWidth) + 2; // left_padding + start_month + visible_months + right_padding
 
