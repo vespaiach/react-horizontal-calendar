@@ -12,6 +12,8 @@ interface MonthData {
     year: number;
 }
 
+type RangeSelection = [Date | null, Date | null];
+
 export default function DatePicker({
     className,
     startDate = new Date(),
@@ -19,6 +21,7 @@ export default function DatePicker({
     monthNameCellHeight = 32,
     weekDayCellHeight = 32,
     dateCellHeight = 36,
+    allowRangeSelection = false,
     onChange,
 }: {
     className?: string;
@@ -27,6 +30,7 @@ export default function DatePicker({
     monthNameCellHeight?: number;
     weekDayCellHeight?: number;
     dateCellHeight?: number;
+    allowRangeSelection?: boolean;
     onChange?: (values: Date | [Date, Date] | null) => void;
 }) {
     const pickerRef = useRef<HTMLDivElement>(null);
@@ -41,7 +45,7 @@ export default function DatePicker({
             containerOffset: x,
         }),
     );
-    const [selected, setSelected] = useState<[Date | null, Date | null]>([null, null]);
+    const [selected, setSelected] = useState<RangeSelection>([null, null]);
 
     const updateContainerWidth = useCallback(() => {
         if (!pickerRef?.current) return;
@@ -79,6 +83,24 @@ export default function DatePicker({
         onWheel: ({ delta: [, y] }) => update(y),
     });
 
+    const handleClick = useCallback(
+        (dt: Date) => {
+            if (!allowRangeSelection) {
+                setSelected([dt, null]);
+                onChange?.(dt);
+            } else {
+                if (selected[0] === null) {
+                    setSelected([dt, null]);
+                } else {
+                    const s: [Date, Date] = selected[0] > dt ? [dt, selected[0]] : [selected[0], dt];
+                    setSelected(s);
+                    onChange?.(s);
+                }
+            }
+        },
+        [onChange, allowRangeSelection, selected],
+    );
+
     return (
         <div
             style={
@@ -96,23 +118,43 @@ export default function DatePicker({
                 ref={pickerRef}
                 style={{ transform: `translate3d(${x}px,0px,0px)` }}>
                 {monthData.map((m) => (
-                    <MonthBox key={`${m.month}${m.year}`} data={m} />
+                    <MonthBox
+                        key={`${m.month}${m.year}`}
+                        data={m}
+                        onClick={handleClick}
+                        dateSelected={selected}
+                    />
                 ))}
             </div>
         </div>
     );
 }
 
-function MonthBox({ data }: { data: MonthData }) {
+function MonthBox({
+    data,
+    onClick,
+    dateSelected,
+}: {
+    onClick: (dt: Date) => void;
+    data: MonthData;
+    dateSelected: RangeSelection;
+}) {
     const dateEls = [];
     const dt = new Date(data.startDate);
     let step = 0;
     for (let i = 0; i < 42; i++) {
         dt.setDate(dt.getDate() + step);
         const disabled = dt.getMonth() !== data.month;
-        const tabIndex = disabled ? { tabIndex: -1 } : {};
+        const copy = new Date(dt);
+        const tabIndex = disabled ? { tabIndex: -1 } : { onClick: () => void onClick(copy) };
+        const selected =
+            !disabled &&
+            dateSelected[0] &&
+            (dateSelected[1] !== null
+                ? dt >= dateSelected[0] && dt <= dateSelected[1]
+                : isSameDate(dt, dateSelected[0] as Date));
         dateEls.push(
-            <button {...tabIndex} className={cx('hdp-date-cell', { disabled })} key={dt.getTime()}>
+            <button {...tabIndex} className={cx('hdp-date-cell', { disabled, selected })} key={dt.getTime()}>
                 {dt.getDate()}
             </button>,
         );
@@ -183,4 +225,12 @@ function firstDateInMonth(firstDateOfMonth: Date): Date {
     }
 
     return firstDateOfMonth;
+}
+
+function isSameDate(dta: Date, dtb: Date) {
+    return (
+        dta.getFullYear() === dtb.getFullYear() &&
+        dta.getMonth() === dtb.getMonth() &&
+        dta.getDate() === dtb.getDate()
+    );
 }

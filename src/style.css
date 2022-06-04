@@ -51,6 +51,10 @@
     height: var(--hdp-date-cell-height);
     outline: none;
 }
+.hdp-date-cell.selected {
+    background: #9cb24b;
+    color: white;
+}
 .hdp-date-cell.disabled {
     color: #3b3b3b40;
 }
@@ -59,6 +63,9 @@
 }
 .hdp-date-cell:not(.disabled):hover {
     background: #d6d6d6;
+}
+.hdp-date-cell.selected:hover {
+    background: #9cb24b80   ;
 }
 .hdp-week-day-cell,
 .hdp-month-name-cell {

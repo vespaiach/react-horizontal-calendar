@@ -1,7 +1,7 @@
 {
     "name": "horizontal-scroll-datepicker",
     "version": "1.0.0",
-    "description": "",
+    "description": "Infinity horizontal scrolling calendar",
     "main": "index.js",
     "scripts": {
         "dev": "webpack serve -c webpack.dev.config.js",
@@ -11,9 +11,12 @@
         "type": "git",
         "url": "git+https://github.com/vespaiach/horizontal-scroll-datepicker.git"
     },
-    "keywords": [],
-    "author": "",
-    "license": "ISC",
+    "keywords": [
+        "datepicker",
+        "infinity scroll"
+    ],
+    "author": "nta.toan@gmail.com",
+    "license": "MIT",
     "bugs": {
         "url": "https://github.com/vespaiach/horizontal-scroll-datepicker/issues"
     },
