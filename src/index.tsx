@@ -17,12 +17,18 @@ interface MonthData {
 export default function DatePicker({
     className,
     startDate = new Date(),
-    boxWidth = 290,
+    monthBoxWidth = 290,
+    monthNameCellHeight = 32,
+    weekDayCellHeight = 32,
+    dateCellHeight = 36,
     onChange,
 }: {
     className?: string;
     startDate?: Date;
-    boxWidth?: number;
+    monthBoxWidth?: number;
+    monthNameCellHeight?: number;
+    weekDayCellHeight?: number;
+    dateCellHeight?: number;
     onChange?: (values: Date | [Date, Date] | null) => void;
 }) {
     const pickerRef = useRef<HTMLDivElement>(null);
@@ -33,7 +39,7 @@ export default function DatePicker({
         getMonthRange({
             startMonth: startDate.getMonth(),
             startYear: startDate.getFullYear(),
-            boxWidth,
+            monthBoxWidth,
             containerWidth,
             containerOffset: x,
         }),
@@ -63,7 +69,7 @@ export default function DatePicker({
                 getMonthRange({
                     startMonth: startDate.getMonth(),
                     startYear: startDate.getFullYear(),
-                    boxWidth,
+                    monthBoxWidth,
                     containerWidth,
                     containerOffset: x + dx,
                 }),
@@ -72,10 +78,19 @@ export default function DatePicker({
     });
 
     return (
-        <div className={cx('hdp-container', className)}>
+        <div
+            style={
+                {
+                    '--hdp-month-box-width': `${monthBoxWidth}px`,
+                    '--hdp-month-name-cell-height': `${monthNameCellHeight}px`,
+                    '--hdp-week-day-cell-height': `${weekDayCellHeight}px`,
+                    '--hdp-date-cell-height': `${dateCellHeight}px`,
+                } as React.CSSProperties
+            }
+            className={cx('hdp-outer-container', className)}>
             <div
                 {...bind()}
-                className="hdp-picker"
+                className="hdp-inner-container"
                 ref={pickerRef}
                 style={{ transform: `translate3d(${x}px,0px,0px)` }}>
                 {monthData.map((m) => (
@@ -95,7 +110,7 @@ function MonthBox({ data }: { data: MonthData }) {
         const disabled = dt.getMonth() !== data.month;
         const tabIndex = disabled ? { tabIndex: -1 } : {};
         dateEls.push(
-            <button {...tabIndex} className={cx('hdp-date', { disabled })} key={dt.getTime()}>
+            <button {...tabIndex} className={cx('hdp-date-cell', { disabled })} key={dt.getTime()}>
                 {dt.getDate()}
             </button>,
         );
@@ -103,10 +118,10 @@ function MonthBox({ data }: { data: MonthData }) {
     }
 
     return (
-        <div className="hdp-month" style={{ transform: `translate3d(${data.x}px,0px,0px)` }}>
-            <div className="hdp-monthname">{`${MonthNames[data.month]} ${data.year}`}</div>
+        <div className="hdp-month-box" style={{ transform: `translate3d(${data.x}px,0px,0px)` }}>
+            <div className="hdp-month-name-cell">{`${MonthNames[data.month]} ${data.year}`}</div>
             {DayNames.map((d, i) => (
-                <div className="hdp-weekday" key={i}>
+                <div className="hdp-week-day-cell" key={i}>
                     {d}
                 </div>
             ))}
@@ -122,22 +137,22 @@ function MonthBox({ data }: { data: MonthData }) {
 function getMonthRange({
     startMonth,
     startYear,
-    boxWidth,
+    monthBoxWidth,
     containerWidth,
     containerOffset,
 }: {
     startMonth: number;
     startYear: number;
-    boxWidth: number;
+    monthBoxWidth: number;
     containerWidth: number;
     containerOffset: number;
 }): MonthData[] {
     const currDate = new Date(startYear, startMonth, 1);
 
-    const deltaMonth = Math.trunc(Math.abs(containerOffset) / boxWidth);
+    const deltaMonth = Math.trunc(Math.abs(containerOffset) / monthBoxWidth);
     currDate.setMonth(currDate.getMonth() - 2 + deltaMonth * (containerOffset > 0 ? -1 : 1));
 
-    const totalMonths = 2 + 1 + Math.trunc(containerWidth / boxWidth) + 2; // left_padding + start_month + visible_months + right_padding
+    const totalMonths = 2 + 1 + Math.trunc(containerWidth / monthBoxWidth) + 2; // left_padding + start_month + visible_months + right_padding
 
     const results: MonthData[] = [];
     for (let i = 1; i <= totalMonths; i++) {
@@ -149,7 +164,7 @@ function getMonthRange({
             year: currDate.getFullYear(),
             x:
                 ((currDate.getFullYear() - startYear) * 12 + (currDate.getMonth() - startMonth)) *
-                (boxWidth + 4),
+                (monthBoxWidth + 4),
         });
     }
 
