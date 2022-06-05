@@ -2,12 +2,26 @@
     "name": "horizontal-datepicker",
     "version": "1.0.0",
     "description": "Infinity horizontal scrolling calendar",
-    "main": "dist/datepicker.bundle.js",
+    "source": "src/index.tsx",
+    "main": "dist/datepicker.js",
+    "module": "dist/datepicker.esm.js",
+    "umd:main": "dist/datepicker.umd.js",
+    "unpkg": "dist/datepicker.umd.js",
+    "exports": {
+        ".": {
+            "require": "./dist/datepicker.js",
+            "import": "./dist/datepicker.esm.js",
+            "umd": "./dist/datepicker.umd.js"
+        },
+        "./dist/defaultTheme.css": "./dist/defaultTheme.css",
+        "./dist/datepicker.css": "./dist/datepicker.css"
+    },
     "scripts": {
         "clean": "rimraf dist",
         "tsc": "tsc ./src/index.tsx --jsx react --declaration --emitDeclarationOnly --outfile ./dist/datepicker.bundle.d.ts",
         "dev": "webpack serve -c webpack.dev.config.js",
-        "build": "npm run clean && webpack"
+        "style": "postcss --use autoprefixer --use postcss-minify -d dist ./src/*.css",
+        "build": "npm run clean && microbundle --jsx React.createElement --css-modules false && npm run style"
     },
     "repository": {
         "type": "git",
@@ -35,7 +49,11 @@
         "css-loader": "^6.7.1",
         "css-minimizer-webpack-plugin": "^4.0.0",
         "html-webpack-plugin": "^5.5.0",
+        "microbundle": "^0.15.0",
         "mini-css-extract-plugin": "^2.6.0",
+        "postcss": "^8.4.14",
+        "postcss-cli": "^9.1.0",
+        "postcss-minify": "^1.1.0",
         "react-dom": "^17.0.0",
         "rimraf": "^3.0.2",
         "style-loader": "^3.3.1",

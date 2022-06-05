@@ -1,5 +1,3 @@
-import './style.css';
-
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import cx from 'classnames';
 import { useGesture } from '@use-gesture/react';

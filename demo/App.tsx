@@ -1,10 +1,10 @@
-import './app.css';
+import '../src/datepicker.css';
 import '../src/defaultTheme.css';
 
 import React from 'react';
 import ReactDOM from 'react-dom';
 
-import DatePicker from '../dist/datepicker.bundle';
+import DatePicker from '../src';
 
 function App() {
     return (
