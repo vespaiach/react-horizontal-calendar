@@ -1,6 +1,8 @@
+import './style.css';
+
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import cx from 'classnames';
-import { useGesture, usePinch, UserHandlers } from '@use-gesture/react';
+import { useGesture } from '@use-gesture/react';
 
 const DayNames = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
 const MonthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -81,6 +83,12 @@ export default function DatePicker({
     const bind = useGesture({
         onDrag: ({ delta: [x] }) => update(x),
         onWheel: ({ delta: [, y] }) => update(y),
+        onMouseDown: (d) => {
+            console.log(d.event.clientX, d.event.clientY);
+        },
+        onMouseUp: (d) => {
+            console.log(d.event.clientX, d.event.clientY);
+        },
     });
 
     const handleClick = useCallback(
@@ -139,6 +147,7 @@ function MonthBox({
     data: MonthData;
     dateSelected: RangeSelection;
 }) {
+    const mousePointRef = useRef<{ x: number; y: number } | null>(null);
     const dateEls = [];
     const dt = new Date(data.startDate);
     let step = 0;
@@ -146,18 +155,45 @@ function MonthBox({
         dt.setDate(dt.getDate() + step);
         const disabled = dt.getMonth() !== data.month;
         const copy = new Date(dt);
-        const tabIndex = disabled ? { tabIndex: -1 } : { onClick: () => void onClick(copy) };
         const selected =
             !disabled &&
             dateSelected[0] &&
             (dateSelected[1] !== null
                 ? dt >= dateSelected[0] && dt <= dateSelected[1]
                 : isSameDate(dt, dateSelected[0] as Date));
-        dateEls.push(
-            <button {...tabIndex} className={cx('hdp-date-cell', { disabled, selected })} key={dt.getTime()}>
-                {dt.getDate()}
-            </button>,
-        );
+
+        if (disabled) {
+            dateEls.push(
+                <button
+                    tabIndex={-1}
+                    className={cx('hdp-date-cell', { disabled, selected })}
+                    key={dt.getTime()}>
+                    {dt.getDate()}
+                </button>,
+            );
+        } else {
+            dateEls.push(
+                <button
+                    onMouseDown={(evt) => {
+                        mousePointRef.current = { x: evt.clientX, y: evt.clientY };
+                    }}
+                    onMouseUp={({ clientX, clientY }) => {
+                        if (!mousePointRef.current) return;
+
+                        if (
+                            Math.abs(clientX - mousePointRef.current.x) < 10 &&
+                            Math.abs(clientY - mousePointRef.current.y) < 10
+                        ) {
+                            onClick(copy);
+                            mousePointRef.current = null;
+                        }
+                    }}
+                    className={cx('hdp-date-cell', { disabled, selected })}
+                    key={dt.getTime()}>
+                    {dt.getDate()}
+                </button>,
+            );
+        }
         step = 1;
     }
 

@@ -1,0 +1,32 @@
+.hdp-outer-container .hdp-inner-container,
+.hdp-date-cell,
+.hdp-month-box,
+.hdp-month-name-cell,
+.hdp-week-day-cell {
+    font-family: 'Roboto', sans-serif;
+    font-size: 0.8rem;
+    line-height: 1.42857143;
+    color: #333;
+    user-select: none;
+}
+.hdp-date-cell.selected {
+    background: #9cb24b;
+    color: white;
+}
+.hdp-date-cell.disabled {
+    color: #3b3b3b40;
+}
+.hdp-date-cell:not(.disabled) {
+    cursor: pointer;
+}
+.hdp-date-cell:not(.disabled):hover {
+    background: #d6d6d6;
+}
+.hdp-date-cell.selected:hover {
+    background: #9cb24b80;
+}
+.hdp-week-day-cell,
+.hdp-month-name-cell {
+    font-weight: 700;
+    color: #4f4e4e;
+}
