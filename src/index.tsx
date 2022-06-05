@@ -83,20 +83,11 @@ export default function DatePicker({
     const bind = useGesture({
         onDrag: ({ delta: [x] }) => update(x),
         onWheel: ({ delta: [, y] }) => update(y),
-        onMouseDown: (d) => {
-            console.log(d.event.clientX, d.event.clientY);
-        },
-        onMouseUp: (d) => {
-            console.log(d.event.clientX, d.event.clientY);
-        },
     });
 
     const handleClick = useCallback(
         (dt: Date) => {
-            if (!allowRangeSelection) {
-                setSelected([dt, null]);
-                onChange?.(dt);
-            } else {
+            if (allowRangeSelection) {
                 if (selected[0] === null) {
                     setSelected([dt, null]);
                 } else {
@@ -104,6 +95,9 @@ export default function DatePicker({
                     setSelected(s);
                     onChange?.(s);
                 }
+            } else {
+                setSelected([dt, null]);
+                onChange?.(dt);
             }
         },
         [onChange, allowRangeSelection, selected],
