@@ -1,15 +1,15 @@
-import '../src/datepicker.css';
+import '../src/calendar.css';
 import '../src/defaultTheme.css';
 
 import React from 'react';
 import ReactDOM from 'react-dom';
 
-import DatePicker from '../src';
+import Calendar from '../src';
 
 function App() {
     return (
         <div>
-            <DatePicker allowRangeSelection />
+            <Calendar allowRangeSelection />
         </div>
     );
 }

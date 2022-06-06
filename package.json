@@ -1,34 +1,34 @@
 {
-    "name": "horizontal-datepicker",
+    "name": "horizontal-calendar",
     "version": "1.0.0",
-    "description": "Infinity horizontal scrolling calendar",
+    "description": "React horizontal infinity-scrolling calendar",
     "source": "src/index.tsx",
-    "main": "dist/datepicker.js",
-    "module": "dist/datepicker.esm.js",
-    "umd:main": "dist/datepicker.umd.js",
-    "unpkg": "dist/datepicker.umd.js",
+    "main": "dist/calendar.js",
+    "module": "dist/calendar.esm.js",
+    "umd:main": "dist/calendar.umd.js",
+    "unpkg": "dist/calendar.umd.js",
     "exports": {
         ".": {
-            "require": "./dist/datepicker.js",
-            "import": "./dist/datepicker.esm.js",
-            "umd": "./dist/datepicker.umd.js"
+            "require": "./dist/calendar.js",
+            "import": "./dist/calendar.esm.js",
+            "umd": "./dist/calendar.umd.js"
         },
         "./dist/defaultTheme.css": "./dist/defaultTheme.css",
-        "./dist/datepicker.css": "./dist/datepicker.css"
+        "./dist/calendar.css": "./dist/calendar.css"
     },
     "scripts": {
         "clean": "rimraf dist",
-        "tsc": "tsc ./src/index.tsx --jsx react --declaration --emitDeclarationOnly --outfile ./dist/datepicker.bundle.d.ts",
+        "tsc": "tsc ./src/index.tsx --jsx react --declaration --emitDeclarationOnly --outfile ./dist/calendar.bundle.d.ts",
         "dev": "webpack serve -c webpack.dev.config.js",
         "style": "postcss --use autoprefixer --use postcss-minify -d dist ./src/*.css",
         "build": "npm run clean && microbundle --jsx React.createElement --css-modules false && npm run style"
     },
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/vespaiach/horizontal-scroll-datepicker.git"
+        "url": "git+https://github.com/vespaiach/react-horizontal-calendar.git"
     },
     "keywords": [
-        "datepicker",
+        "calendar",
         "infinity scroll",
         "react",
         "horizontal"
@@ -36,9 +36,9 @@
     "author": "nta.toan@gmail.com",
     "license": "MIT",
     "bugs": {
-        "url": "https://github.com/vespaiach/horizontal-scroll-datepicker/issues"
+        "url": "https://github.com/vespaiach/react-horizontal-calendar/issues"
     },
-    "homepage": "https://github.com/vespaiach/horizontal-scroll-datepicker#readme",
+    "homepage": "https://github.com/vespaiach/react-horizontal-calendar#readme",
     "devDependencies": {
         "@babel/core": "^7.18.2",
         "@babel/preset-env": "^7.18.2",

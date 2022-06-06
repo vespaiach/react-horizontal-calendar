@@ -14,7 +14,7 @@ interface MonthData {
 
 type RangeSelection = [Date | null, Date | null];
 
-export default function DatePicker({
+export default function Calendar({
     className,
     startDate = new Date(),
     monthBoxWidth = 290,
