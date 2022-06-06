@@ -9,46 +9,46 @@ const DayNames = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
 const MonthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
 interface MonthData {
-    startDate: Date;
+    startAt: Date;
     x: number;
     month: number;
     year: number;
 }
 
-type RangeSelection = [Date | null, Date | null];
-
 export default function Calendar({
     className,
-    startDate = new Date(),
+    startAt = new Date(),
+    selection,
     monthBoxWidth = 290,
     monthNameCellHeight = 32,
     weekDayCellHeight = 32,
     dateCellHeight = 36,
-    allowRangeSelection = false,
+    rangeSelection = false,
     onChange,
 }: {
     className?: string;
-    startDate?: Date;
+    startAt?: Date;
+    selection?: [Date, Date] | Date | null;
     monthBoxWidth?: number;
     monthNameCellHeight?: number;
     weekDayCellHeight?: number;
     dateCellHeight?: number;
-    allowRangeSelection?: boolean;
-    onChange?: (values: Date | [Date, Date] | null) => void;
+    rangeSelection?: boolean;
+    onChange?: (values: Date | [Date, Date]) => void;
 }) {
+    const fromRef = useRef<Date | null>(null);
     const pickerRef = useRef<HTMLDivElement>(null);
     const [containerWidth, setContainerWidth] = useState(2000);
     const [x, setX] = useState(0);
     const [monthData, setMonthData] = useState(() =>
         getMonthRange({
-            startMonth: startDate.getMonth(),
-            startYear: startDate.getFullYear(),
+            startMonth: startAt.getMonth(),
+            startYear: startAt.getFullYear(),
             monthBoxWidth,
             containerWidth,
             containerOffset: x,
         }),
     );
-    const [selected, setSelected] = useState<RangeSelection>([null, null]);
 
     const updateContainerWidth = useCallback(() => {
         if (!pickerRef?.current) return;
@@ -72,8 +72,8 @@ export default function Calendar({
         setX(x + delta);
         setMonthData(
             getMonthRange({
-                startMonth: startDate.getMonth(),
-                startYear: startDate.getFullYear(),
+                startMonth: startAt.getMonth(),
+                startYear: startAt.getFullYear(),
                 monthBoxWidth,
                 containerWidth,
                 containerOffset: x + delta,
@@ -88,20 +88,20 @@ export default function Calendar({
 
     const handleClick = useCallback(
         (dt: Date) => {
-            if (allowRangeSelection) {
-                if (selected[0] === null) {
-                    setSelected([dt, null]);
+            if (rangeSelection) {
+                if (fromRef.current === null) {
+                    fromRef.current = dt;
                 } else {
-                    const s: [Date, Date] = selected[0] > dt ? [dt, selected[0]] : [selected[0], dt];
-                    setSelected(s);
-                    onChange?.(s);
+                    const copyDate = new Date(fromRef.current);
+                    fromRef.current = null;
+                    onChange?.(copyDate > dt ? [dt, copyDate] : [copyDate, dt]);
                 }
             } else {
-                setSelected([dt, null]);
+                fromRef.current = null;
                 onChange?.(dt);
             }
         },
-        [onChange, allowRangeSelection, selected],
+        [onChange, rangeSelection],
     );
 
     return (
@@ -125,7 +125,7 @@ export default function Calendar({
                         key={`${m.month}${m.year}`}
                         data={m}
                         onClick={handleClick}
-                        dateSelected={selected}
+                        dateSelected={selection}
                     />
                 ))}
             </div>
@@ -140,22 +140,22 @@ function MonthBox({
 }: {
     onClick: (dt: Date) => void;
     data: MonthData;
-    dateSelected: RangeSelection;
+    dateSelected?: Date | [Date, Date] | null;
 }) {
     const mousePointRef = useRef<{ x: number; y: number } | null>(null);
     const dateEls = [];
-    const dt = new Date(data.startDate);
+    const dt = new Date(data.startAt);
     let step = 0;
     for (let i = 0; i < 42; i++) {
         dt.setDate(dt.getDate() + step);
         const disabled = dt.getMonth() !== data.month;
         const copy = new Date(dt);
-        const selected =
-            !disabled &&
-            dateSelected[0] &&
-            (dateSelected[1] !== null
+        let selected = false;
+        if (!disabled && dateSelected) {
+            selected = Array.isArray(dateSelected)
                 ? dt >= dateSelected[0] && dt <= dateSelected[1]
-                : isSameDate(dt, dateSelected[0] as Date));
+                : isSameDate(dt, dateSelected as Date);
+        }
 
         if (disabled) {
             dateEls.push(
@@ -234,7 +234,7 @@ function getMonthRange({
         const firstDateOfMonth = new Date(currDate.setMonth(currDate.getMonth() + 1));
 
         results.push({
-            startDate: firstDateInMonth(firstDateOfMonth),
+            startAt: firstDateInMonth(firstDateOfMonth),
             month: currDate.getMonth(),
             year: currDate.getFullYear(),
             x:
