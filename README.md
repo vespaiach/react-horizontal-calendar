@@ -24,7 +24,7 @@ You will need to install packages: [React](https://github.com/facebook/react), [
 
 You will also need to include CSS file `calendar.css` from this package. The below example shows how to include CSS files
 
-```js
+```tsx
 import '@vespaiach/horizontal-calendar/dist/calendar.css';
 import '@vespaiach/horizontal-calendar/dist/defaultTheme.css';
 
@@ -34,17 +34,15 @@ import ReactDOM from 'react-dom';
 import Calendar from '@vespaiach/horizontal-calendar';
 
 function App() {
-    return (
-        <div>
-            <Calendar allowRangeSelection />
-        </div>
-    );
+    const [selection, setSelection] = useState<Date | [Date, Date | null] | null>(null);
+
+    return <Calendar rangeSelection selection={selection} onChange={setSelection} />;
 }
 
 ReactDOM.render(<App />, document.querySelector('#root'));
 ```
 
-**Note:** overwrite `defaultTheme.css` to re-style the calendar as you wish 
+**Note:** overwrite `defaultTheme.css` to re-style the calendar as you wish
 
 # Configuration
 
@@ -54,16 +52,17 @@ The basic usage:
 <Calendar onChange={handleChange} />
 ```
 
-| options             | Note                                             | required                                |
-| ------------------- | ------------------------------------------------ | --------------------------------------- |
-| onChange            | (values: Date \| [Date, Date] \| null) => void   | no                                      |
-| className           | string - css class                               | no                                      |
-| startDate           | Date - the date calendar will show from begining | no (default current date)               |
-| allowRangeSelection | boolean - allow to select a range of dates       | no (default to only select single date) |
-| monthBoxWidth       | number - width of each month box                 | no (default = 290px)                    |
-| monthNameCellHeight | number - height of very top cell                 | no (default = 32px)                     |
-| weekDayCellHeight   | number - height of week day cell                 | no (default = 32px)                     |
-| dateCellHeight      | number - height of date cell                     | no (default = 32px)                     |
+| options             | Note                                                            | required                                |
+| ------------------- | --------------------------------------------------------------- | --------------------------------------- |
+| onChange            | (values: Date \| [Date, Date \| null]) => void                  | no                                      |
+| className           | string - css class                                              | no                                      |
+| startAt             | Date - the date calendar will show from begining                | no (default current date)               |
+| rangeSelection      | boolean - allow to select a range of dates                      | no (default to only select single date) |
+| selection           | Date \| [Date, Date \| null] \| null - dates are being selected | no                                      |
+| monthBoxWidth       | number - width of each month box                                | no (default = 290px)                    |
+| monthNameCellHeight | number - height of very top cell                                | no (default = 32px)                     |
+| weekDayCellHeight   | number - height of week day cell                                | no (default = 32px)                     |
+| dateCellHeight      | number - height of date cell                                    | no (default = 32px)                     |
 
 # License
 
