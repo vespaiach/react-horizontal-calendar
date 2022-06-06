@@ -1,6 +1,6 @@
 {
     "name": "@vespaiach/horizontal-calendar",
-    "version": "0.0.9",
+    "version": "1.0.0",
     "description": "React horizontal infinity-scrolling calendar",
     "source": "src/calendar.tsx",
     "main": "dist/calendar.js",
