@@ -17,6 +17,7 @@
     left: 0;
     display: grid;
     width: var(--hdp-month-box-width);
+    grid-gap: 0;
 }
 .hdp-month-name-cell,
 .hdp-date-cell,
@@ -36,6 +37,7 @@
 .hdp-date-cell {
     border: none;
     padding: 0;
+    margin: 0;
     height: var(--hdp-date-cell-height);
     outline: none;
 }

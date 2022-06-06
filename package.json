@@ -29,7 +29,9 @@
     },
     "keywords": [
         "datepicker",
-        "infinity scroll"
+        "infinity scroll",
+        "react",
+        "horizontal"
     ],
     "author": "nta.toan@gmail.com",
     "license": "MIT",
