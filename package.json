@@ -13,14 +13,15 @@
             "import": "./dist/calendar.esm.js",
             "umd": "./dist/calendar.umd.js"
         },
-        "./dist/defaultTheme.css": "./dist/defaultTheme.css",
-        "./dist/calendar.css": "./dist/calendar.css"
+        "./package.json": "./package.json",
+        "./dist/calendar.css": "./dist/calendar.css",
+        "./dist/defaultTheme.css": "./dist/defaultTheme.css"
     },
     "scripts": {
         "clean": "rimraf dist",
         "tsc": "tsc ./src/index.tsx --jsx react --declaration --emitDeclarationOnly --outfile ./dist/calendar.bundle.d.ts",
         "dev": "webpack serve -c webpack.dev.config.js",
-        "style": "postcss --use autoprefixer --use postcss-minify -d dist ./src/*.css",
+        "style": "postcss -m --use autoprefixer --use postcss-minify -d dist ./src/*.css",
         "build": "npm run clean && microbundle --jsx React.createElement --css-modules false && npm run style"
     },
     "repository": {
@@ -68,5 +69,6 @@
         "@use-gesture/react": ">=10.2.15",
         "classnames": ">=2.3.1",
         "react": ">=17.0.0"
-    }
+    },
+    "types": "./dist/calendar.d.ts"
 }

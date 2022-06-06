@@ -20,6 +20,8 @@ yarn add @vespaiach/horizontal-calendar
 
 You will need to install packages: [React](https://github.com/facebook/react), [@use-gesture/react](https://github.com/pmndrs/use-gesture) and [classnames](https://github.com/JedWatson/classnames). Please find their support versions under `peerDependencies` section in [package.json](https://github.com/vespaiach/react-horizontal-calendar/blob/main/package.json)
 
+# The Gist
+
 You will also need to include CSS file `calendar.css` from this package. The below example shows how to include CSS files
 
 ```js
@@ -41,6 +43,8 @@ function App() {
 
 ReactDOM.render(<App />, document.querySelector('#root'));
 ```
+
+**Note:** overwrite `defaultTheme.css` to re-style the calendar as you wish 
 
 # Configuration
 

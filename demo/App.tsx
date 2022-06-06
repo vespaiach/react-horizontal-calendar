@@ -1,6 +1,3 @@
-import '../src/calendar.css';
-import '../src/defaultTheme.css';
-
 import React from 'react';
 import ReactDOM from 'react-dom';
 
