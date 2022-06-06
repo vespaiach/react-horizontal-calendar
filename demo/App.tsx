@@ -4,7 +4,7 @@ import '../src/defaultTheme.css';
 import React from 'react';
 import ReactDOM from 'react-dom';
 
-import Calendar from '../src';
+import Calendar from '../src/calendar';
 
 function App() {
     return (
