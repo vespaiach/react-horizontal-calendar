@@ -7,7 +7,7 @@ import ReactDOM from 'react-dom';
 import Calendar from '../src/calendar';
 
 function App() {
-    const [selection, setSelection] = useState<Date | [Date, Date] | null>(null);
+    const [selection, setSelection] = useState<Date | [Date, Date | null] | null>(null);
 
     return <Calendar rangeSelection selection={selection} onChange={setSelection} />;
 }

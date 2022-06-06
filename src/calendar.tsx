@@ -34,9 +34,9 @@ export default function Calendar({
     weekDayCellHeight?: number;
     dateCellHeight?: number;
     rangeSelection?: boolean;
-    onChange?: (values: Date | [Date, Date]) => void;
+    onChange?: (values: Date | [Date, Date | null]) => void;
 }) {
-    const fromRef = useRef<Date | null>(null);
+    const selectionRef = useRef<Date | null>(null);
     const pickerRef = useRef<HTMLDivElement>(null);
     const [containerWidth, setContainerWidth] = useState(2000);
     const [x, setX] = useState(0);
@@ -89,15 +89,16 @@ export default function Calendar({
     const handleClick = useCallback(
         (dt: Date) => {
             if (rangeSelection) {
-                if (fromRef.current === null) {
-                    fromRef.current = dt;
+                if (selectionRef.current === null) {
+                    selectionRef.current = dt;
+                    onChange?.([dt, null]);
                 } else {
-                    const copyDate = new Date(fromRef.current);
-                    fromRef.current = null;
+                    const copyDate = new Date(selectionRef.current);
+                    selectionRef.current = null;
                     onChange?.(copyDate > dt ? [dt, copyDate] : [copyDate, dt]);
                 }
             } else {
-                fromRef.current = null;
+                selectionRef.current = null;
                 onChange?.(dt);
             }
         },
@@ -126,6 +127,7 @@ export default function Calendar({
                         data={m}
                         onClick={handleClick}
                         dateSelected={selection}
+                        dateSelecting={selectionRef.current}
                     />
                 ))}
             </div>
@@ -137,10 +139,12 @@ function MonthBox({
     data,
     onClick,
     dateSelected,
+    dateSelecting,
 }: {
     onClick: (dt: Date) => void;
     data: MonthData;
     dateSelected?: Date | [Date, Date] | null;
+    dateSelecting: Date | null;
 }) {
     const mousePointRef = useRef<{ x: number; y: number } | null>(null);
     const dateEls = [];
@@ -149,11 +153,13 @@ function MonthBox({
     for (let i = 0; i < 42; i++) {
         dt.setDate(dt.getDate() + step);
         const disabled = dt.getMonth() !== data.month;
-        const copy = new Date(dt);
+
         let selected = false;
         if (!disabled && dateSelected) {
             selected = Array.isArray(dateSelected)
-                ? dt >= dateSelected[0] && dt <= dateSelected[1]
+                ? dateSelected[1] !== null
+                    ? dt >= dateSelected[0] && dt <= dateSelected[1]
+                    : isSameDate(dt, dateSelected[0])
                 : isSameDate(dt, dateSelected as Date);
         }
 
@@ -169,21 +175,24 @@ function MonthBox({
         } else {
             dateEls.push(
                 <button
+                    data-date={dt.toISOString()}
                     onMouseDown={(evt) => {
                         mousePointRef.current = { x: evt.clientX, y: evt.clientY };
                     }}
-                    onMouseUp={({ clientX, clientY }) => {
-                        if (!mousePointRef.current) return;
+                    onMouseUp={(evt) => {
+                        if (!mousePointRef.current || !(evt.target instanceof HTMLButtonElement)) {
+                            return;
+                        }
 
                         if (
-                            Math.abs(clientX - mousePointRef.current.x) < 10 &&
-                            Math.abs(clientY - mousePointRef.current.y) < 10
+                            Math.abs(evt.clientX - mousePointRef.current.x) < 10 &&
+                            Math.abs(evt.clientY - mousePointRef.current.y) < 10
                         ) {
-                            onClick(copy);
                             mousePointRef.current = null;
+                            onClick(new Date(evt.target.dataset.date as string));
                         }
                     }}
-                    className={cx('hdp-date-cell', { disabled, selected })}
+                    className={cx('hdp-date-cell', { disabled, selected, selecting: dateSelecting === dt })}
                     key={dt.getTime()}>
                     {dt.getDate()}
                 </button>,
