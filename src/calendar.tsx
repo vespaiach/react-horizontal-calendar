@@ -15,6 +15,27 @@ interface MonthData {
     year: number;
 }
 
+interface CommonProps {
+    className?: string;
+    startAt?: Date;
+    monthBoxWidth?: number;
+    monthNameCellHeight?: number;
+    weekDayCellHeight?: number;
+    dateCellHeight?: number;
+}
+
+interface SingleSelectCalendarProps extends CommonProps {
+    selection?: Date | null;
+    rangeSelection: false;
+    onChange?: (values: Date) => void;
+}
+
+interface RangeSelectCalendarProps extends CommonProps {
+    selection?: [Date, Date | null] | null;
+    rangeSelection: true;
+    onChange?: (values: [Date, Date | null]) => void;
+}
+
 export default function Calendar({
     className,
     startAt = new Date(),
@@ -23,19 +44,9 @@ export default function Calendar({
     monthNameCellHeight = 32,
     weekDayCellHeight = 32,
     dateCellHeight = 36,
-    rangeSelection = false,
+    rangeSelection,
     onChange,
-}: {
-    className?: string;
-    startAt?: Date;
-    selection?: [Date, Date] | Date | null;
-    monthBoxWidth?: number;
-    monthNameCellHeight?: number;
-    weekDayCellHeight?: number;
-    dateCellHeight?: number;
-    rangeSelection?: boolean;
-    onChange?: (values: Date | [Date, Date | null]) => void;
-}) {
+}: SingleSelectCalendarProps | RangeSelectCalendarProps) {
     const selectionRef = useRef<Date | null>(null);
     const pickerRef = useRef<HTMLDivElement>(null);
     const [containerWidth, setContainerWidth] = useState(2000);
@@ -143,7 +154,7 @@ function MonthBox({
 }: {
     onClick: (dt: Date) => void;
     data: MonthData;
-    dateSelected?: Date | [Date, Date] | null;
+    dateSelected?: Date | [Date, Date | null] | null;
     dateSelecting: Date | null;
 }) {
     const mousePointRef = useRef<{ x: number; y: number } | null>(null);
