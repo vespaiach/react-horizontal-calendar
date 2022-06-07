@@ -34,7 +34,7 @@ import ReactDOM from 'react-dom';
 import Calendar from '@vespaiach/horizontal-calendar';
 
 function App() {
-    const [selection, setSelection] = useState<Date | [Date, Date | null] | null>(null);
+    const [selection, setSelection] = useState<[Date, Date | null] | null>(null);
 
     return <Calendar rangeSelection selection={selection} onChange={setSelection} />;
 }
